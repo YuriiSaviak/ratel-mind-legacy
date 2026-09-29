@@ -1,0 +1,18 @@
+name: ratel-mind-legacy
+
+services:
+  postgres:
+    image: postgres:18.3
+    container_name: ratel-mind-legacy-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ura123
+      POSTGRES_DB: ratel_mind_legacy
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_legacy_data:/var/lib/postgresql
+
+volumes:
+  postgres_legacy_data:

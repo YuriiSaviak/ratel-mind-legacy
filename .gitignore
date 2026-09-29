@@ -1,0 +1,23 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Ignored default folder with query files
+/queries/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+/.idea
+*.iml
+/target/
+
+# Local runtime files and generated artifacts
+*.log
+**/.run/
+**/node_modules/
+**/dist/
+**/target/
+.env
+.env.*
+!.env.example
