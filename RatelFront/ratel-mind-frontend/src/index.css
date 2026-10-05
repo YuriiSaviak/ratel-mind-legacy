@@ -3951,6 +3951,204 @@ transform: scale(1.02);
   color: var(--text-muted);
 }
 
+.aiCompareCard__eyebrow,
+.aiCompareMethodology__eyebrow {
+  display: inline-flex;
+  margin-bottom: 10px;
+  color: #536a9c;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.aiCompareResearchSummary {
+  display: grid;
+  grid-template-columns: 1.45fr repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid rgba(104, 122, 172, 0.18);
+  border-radius: 20px;
+  background: #fbfcff;
+}
+
+.aiCompareResearchSummary__verdict,
+.aiCompareResearchSummary__item {
+  display: grid;
+  align-content: center;
+  gap: 7px;
+  min-height: 126px;
+  padding: 20px;
+  border-right: 1px solid rgba(104, 122, 172, 0.14);
+}
+
+.aiCompareResearchSummary__item:last-child {
+  border-right: 0;
+}
+
+.aiCompareResearchSummary__verdict {
+  background: linear-gradient(135deg, #eef3ff, #f8f5ff);
+}
+
+.aiCompareResearchSummary__verdict--near {
+  background: linear-gradient(135deg, #fff8e8, #fffdf7);
+}
+
+.aiCompareResearchSummary__verdict--difference {
+  background: linear-gradient(135deg, #fff0f1, #fff9fa);
+}
+
+.aiCompareResearchSummary__label,
+.aiCompareResearchSummary__item span {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.aiCompareResearchSummary strong {
+  color: #2e3d66;
+  font-family: var(--test-heading);
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.aiCompareResearchSummary__verdict strong {
+  font-size: 23px;
+}
+
+.aiCompareResearchSummary p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.aiCompareMethodology {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(0, 2fr);
+  align-items: start;
+  gap: 24px;
+  background: linear-gradient(120deg, #f4f7ff, #fbfcff);
+}
+
+.aiCompareMethodology h4 {
+  margin-bottom: 0;
+}
+
+.aiComparePillarGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.aiComparePillarGrid__item {
+  display: grid;
+  gap: 8px;
+  padding: 15px;
+  border: 1px solid rgba(122, 139, 183, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.aiComparePillarGrid__item > div:first-child {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.aiComparePillarGrid__item > div:first-child span {
+  font-weight: 700;
+}
+
+.aiComparePillarGrid__item > div:first-child strong {
+  color: #455b8c;
+  font-family: var(--test-heading);
+  font-size: 18px;
+}
+
+.aiComparePillarGrid__bar {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8ecf6;
+}
+
+.aiComparePillarGrid__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7586bd, #8a6ec4);
+}
+
+.aiComparePillarGrid__item small,
+.aiComparePillarGrid__item p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.aiComparePillarGrid__item p {
+  color: #52668f;
+  font-weight: 600;
+}
+
+@media (max-width: 860px) {
+  .aiCompareResearchSummary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .aiCompareResearchSummary__verdict,
+  .aiCompareResearchSummary__item {
+    min-height: 112px;
+  }
+
+  .aiCompareResearchSummary__item:nth-child(2) {
+    border-right: 0;
+  }
+
+  .aiCompareResearchSummary__item:nth-child(3) {
+    border-top: 1px solid rgba(104, 122, 172, 0.14);
+  }
+
+  .aiCompareResearchSummary__item:nth-child(4) {
+    border-top: 1px solid rgba(104, 122, 172, 0.14);
+    border-right: 0;
+  }
+
+  .aiCompareMethodology {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 560px) {
+  .aiCompareResearchSummary,
+  .aiComparePillarGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .aiCompareResearchSummary__verdict,
+  .aiCompareResearchSummary__item {
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid rgba(104, 122, 172, 0.14);
+  }
+
+  .aiCompareResearchSummary__item:nth-child(2),
+  .aiCompareResearchSummary__item:nth-child(3),
+  .aiCompareResearchSummary__item:nth-child(4) {
+    border-top: 0;
+  }
+
+  .aiCompareResearchSummary__item:last-child {
+    border-bottom: 0;
+  }
+}
+
 .aiCompareCard__source {
   display: inline-flex;
   align-items: center;

@@ -112,6 +112,34 @@ export default function TestAiInsightsPage() {
         return weakest;
     }, [meta]);
 
+    const comparisonStatus = useMemo(() => {
+        if (!aiAnalysis) return null;
+        const difference = Math.abs(aiAnalysis.aiLevel - aiAnalysis.classicLevel);
+        if (difference === 0) return {label: "Wynik zgodny", detail: "Oba podejścia wskazują ten sam poziom.", tone: "match"};
+        if (difference === 1) return {label: "Niewielka różnica", detail: "Metody różnią się o jeden poziom.", tone: "near"};
+        return {label: "Istotna różnica", detail: `Metody różnią się o ${difference} poziomy.`, tone: "difference"};
+    }, [aiAnalysis]);
+
+    const pillarComparisonRows = useMemo(() => {
+        if (!meta) return [];
+        return PILLAR_ORDER.map((pillarName) => {
+            const pillar = meta.pillarResults.get(pillarName);
+            const focus = pillarName === weakestPillarName
+                ? "obszar ryzyka w interpretacji"
+                : pillarName === topPillarName
+                    ? "najsilniejszy zasób profilu"
+                    : "kontekst relacji między filarami";
+
+            return {
+                name: localizePillarName(pillarName),
+                sum: pillar?.sum ?? 0,
+                pct: pillar?.pct ?? 0,
+                level: pillar?.level ?? "Unknown",
+                focus,
+            };
+        });
+    }, [meta, topPillarName, weakestPillarName]);
+
     const aiDifferenceTitle = useMemo(() => {
         if (!aiAnalysis) return "";
         if (aiAnalysis.classicLevel === aiAnalysis.aiLevel) return "Oba podejścia wskazują ten sam poziom, ale akcentują inne niuanse.";
@@ -327,8 +355,9 @@ export default function TestAiInsightsPage() {
                 <div className="aiCompareCard">
                     <div className="aiCompareCard__header">
                         <div>
-                            <h3>Porównanie algorytmów</h3>
-                            <p>Osobny widok pokazujący, jak klasyczny algorytm punktowy i interpretacja AI czytają ten sam profil odpowiedzi.</p>
+                            <span className="aiCompareCard__eyebrow">Panel badawczy · ta sama próbka odpowiedzi</span>
+                            <h3>Klasyczny wynik a interpretacja AI</h3>
+                            <p>Porównanie dwóch metod analizy tego samego zestawu {QUESTIONS.length} odpowiedzi: przejrzystego algorytmu punktowego oraz modelu językowego, który interpretuje układ całego profilu.</p>
                         </div>
                         {aiAnalysis && (
                             <span className={`aiCompareCard__source ${isLiveAiSource(aiAnalysis) ? "aiCompareCard__source--live" : "aiCompareCard__source--fallback"}`}>
@@ -342,6 +371,26 @@ export default function TestAiInsightsPage() {
 
                     {aiAnalysis && (
                         <>
+                            <div className="aiCompareResearchSummary">
+                                <div className={`aiCompareResearchSummary__verdict aiCompareResearchSummary__verdict--${comparisonStatus?.tone}`}>
+                                    <span className="aiCompareResearchSummary__label">Wynik porównania</span>
+                                    <strong>{comparisonStatus?.label}</strong>
+                                    <p>{comparisonStatus?.detail}</p>
+                                </div>
+                                <div className="aiCompareResearchSummary__item">
+                                    <span>Materiał wejściowy</span>
+                                    <strong>{QUESTIONS.length} odpowiedzi · 4 filary</strong>
+                                </div>
+                                <div className="aiCompareResearchSummary__item">
+                                    <span>Algorytm klasyczny</span>
+                                    <strong>stałe reguły i progi punktowe</strong>
+                                </div>
+                                <div className="aiCompareResearchSummary__item">
+                                    <span>AI</span>
+                                    <strong>interpretacja kontekstu odpowiedzi</strong>
+                                </div>
+                            </div>
+
                             <div className="aiCompareCard__algorithms">
                                 <div className="aiCompareCard__algorithmPane aiCompareCard__algorithmPane--classic">
                                     <div className="aiCompareCard__algorithmHead">
@@ -392,6 +441,32 @@ export default function TestAiInsightsPage() {
                             <p className="aiCompareCard__summary">{aiAnalysis.summary}</p>
 
                             <div className="aiCompareCard__grid">
+                                <div className="aiCompareCard__box aiCompareCard__box--full aiCompareMethodology">
+                                    <div>
+                                        <span className="aiCompareMethodology__eyebrow">Metodologia porównania</span>
+                                        <h4>Co jest porównywane?</h4>
+                                    </div>
+                                    <p>Obie metody otrzymują dokładnie ten sam wynik testu i komplet odpowiedzi. Różnica nie dotyczy danych wejściowych, lecz sposobu ich przetwarzania: algorytm klasyczny sumuje punkty według zdefiniowanych reguł, a AI analizuje wzorce, proporcje i potencjalne napięcia między odpowiedziami.</p>
+                                </div>
+                                <div className="aiCompareCard__box aiCompareCard__box--full">
+                                    <h4>Wspólny profil wejściowy</h4>
+                                    <p className="aiCompareCard__tableHint">Te wartości zostały przekazane obu metodom. Etykieta po prawej pokazuje, jaki kontekst danego filaru jest istotny dla porównania — nie jest osobną diagnozą AI.</p>
+                                    <div className="aiComparePillarGrid">
+                                        {pillarComparisonRows.map((pillar) => (
+                                            <article key={pillar.name} className="aiComparePillarGrid__item">
+                                                <div>
+                                                    <span>{pillar.name}</span>
+                                                    <strong>{pillar.sum}/60</strong>
+                                                </div>
+                                                <div className="aiComparePillarGrid__bar" aria-label={`${pillar.name}: ${pillar.pct}%`}>
+                                                    <span style={{width: `${pillar.pct}%`}} />
+                                                </div>
+                                                <small>{pillar.level} · {pillar.pct}%</small>
+                                                <p>{pillar.focus}</p>
+                                            </article>
+                                        ))}
+                                    </div>
+                                </div>
                                 <div className="aiCompareCard__box">
                                     <h4>Jak liczy algorytm klasyczny</h4>
                                     <p>Poziom klasyczny wynika bezpośrednio z łącznej liczby punktów: <strong>{meta.totalScore} / 240</strong>. To szybka, przewidywalna ocena oparta na sumie odpowiedzi oraz ustalonych progach punktowych.</p>
