@@ -67,7 +67,14 @@ $env:EMAIL_PASSWORD="haslo-aplikacji-gmail"
 $env:EMAIL_RECEIVER="adres-odbiorcy@example.com"
 ```
 
-Klucze AI są opcjonalne. Bez `OPENAI_API_KEY` i `GROQ_API_KEY` aplikacja korzysta z demonstracyjnej analizy fallback.
+Klucze AI są opcjonalne. Aby włączyć analizę przez OpenRouter, ustaw:
+
+```powershell
+$env:OPENROUTER_API_KEY="twoj-klucz-openrouter"
+$env:OPENROUTER_MODEL="openai/gpt-4o"
+```
+
+Możesz też opcjonalnie ustawić `OPENROUTER_SITE_URL` i `OPENROUTER_SITE_NAME` dla nagłówków OpenRouter. Bez klucza aplikacja korzysta z demonstracyjnej analizy fallback.
 
 ## Oddzielenie od mastera
 

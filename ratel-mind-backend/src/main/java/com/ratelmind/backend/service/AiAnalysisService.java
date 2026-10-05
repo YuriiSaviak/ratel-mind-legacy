@@ -37,6 +37,18 @@ public class AiAnalysisService {
     @Value("${openai.model:gpt-5.4-mini}")
     private String openAiModel;
 
+    @Value("${openrouter.api-key:}")
+    private String openRouterApiKey;
+
+    @Value("${openrouter.model:openai/gpt-4o}")
+    private String openRouterModel;
+
+    @Value("${openrouter.site-url:}")
+    private String openRouterSiteUrl;
+
+    @Value("${openrouter.site-name:Ratel Mind}")
+    private String openRouterSiteName;
+
     @Value("${groq.api-key:}")
     private String groqApiKey;
 
@@ -45,6 +57,10 @@ public class AiAnalysisService {
 
     public AiAnalysisResponseDto analyze(AiAnalysisRequestDto dto) {
         try {
+            if (StringUtils.hasText(openRouterApiKey)) {
+                return callOpenRouter(dto);
+            }
+
             if (StringUtils.hasText(groqApiKey)) {
                 return callGroq(dto);
             }
@@ -58,6 +74,82 @@ public class AiAnalysisService {
             log.warn("AI analysis failed, using fallback: {}", ex.getMessage(), ex);
             return buildFallback(dto, ex.getMessage());
         }
+    }
+
+    private AiAnalysisResponseDto callOpenRouter(AiAnalysisRequestDto dto) throws IOException, InterruptedException {
+        String prompt = buildPrompt(dto);
+
+        ObjectNode root = objectMapper.createObjectNode();
+        root.put("model", openRouterModel);
+        root.put("temperature", 0.2);
+        root.put("max_tokens", 900);
+        root.putObject("response_format").put("type", "json_object");
+
+        ArrayNode messages = root.putArray("messages");
+        ObjectNode systemMessage = messages.addObject();
+        systemMessage.put("role", "system");
+        systemMessage.put("content", """
+                Jestes analitykiem psychologicznym. Na podstawie odpowiedzi uzytkownika i wyniku klasycznego przygotuj alternatywna, AI-wspomagana klasyfikacje odpornosci psychicznej.
+                Zwracaj wylacznie poprawny JSON.
+                Wymagane pola:
+                - aiLevel (integer 1..5)
+                - agreement (string: zgodny | bliski | rozny)
+                - summary (string)
+                - strengths (array of strings)
+                - risks (array of strings)
+                - recommendations (array of strings)
+                Odpowiadaj po polsku.
+                """);
+        ObjectNode userMessage = messages.addObject();
+        userMessage.put("role", "user");
+        userMessage.put("content", prompt);
+
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("https://openrouter.ai/api/v1/chat/completions"))
+                .timeout(Duration.ofSeconds(45))
+                .header("Authorization", "Bearer " + openRouterApiKey)
+                .header("Content-Type", "application/json")
+                .header("X-Title", openRouterSiteName);
+
+        if (StringUtils.hasText(openRouterSiteUrl)) {
+            requestBuilder.header("HTTP-Referer", openRouterSiteUrl);
+        }
+
+        HttpRequest request = requestBuilder
+                .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(root)))
+                .build();
+
+        HttpClient client = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(20))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw new IllegalStateException("OpenRouter HTTP " + response.statusCode() + ": " + response.body());
+        }
+
+        JsonNode rootResponse = objectMapper.readTree(response.body());
+        String outputText = rootResponse.path("choices").path(0).path("message").path("content").asText("");
+        if (!StringUtils.hasText(outputText)) {
+            throw new IllegalStateException("OpenRouter response does not contain message.content");
+        }
+
+        JsonNode parsed = objectMapper.readTree(outputText);
+        int aiResultLevel = parsed.path("aiLevel").asInt(dto.classicLevel());
+        String agreementValue = parsed.path("agreement").asText(buildAgreement(dto.classicLevel(), aiResultLevel));
+        String summaryValue = parsed.path("summary").asText("AI nie zwrocilo opisu.");
+
+        return new AiAnalysisResponseDto(
+                "openrouter",
+                openRouterModel,
+                dto.classicLevel(),
+                aiResultLevel,
+                agreementValue,
+                summaryValue,
+                readStringArray(parsed.path("strengths")),
+                readStringArray(parsed.path("risks")),
+                readStringArray(parsed.path("recommendations"))
+        );
     }
 
     private AiAnalysisResponseDto callGroq(AiAnalysisRequestDto dto) throws IOException, InterruptedException {

@@ -72,12 +72,13 @@ export default function TestAiInsightsPage() {
     const meta: FinalResult | null = resultMeta;
 
     const getAiSourceLabel = (analysis: AiAnalysis) => {
+        if (analysis.source === "openrouter") return `AI analysis · OpenRouter · ${analysis.model}`;
         if (analysis.source === "openai") return `AI analysis · OpenAI · ${analysis.model}`;
         if (analysis.source === "groq") return `AI analysis · Groq · ${analysis.model}`;
         return "AI demo fallback";
     };
 
-    const isLiveAiSource = (analysis: AiAnalysis) => analysis.source === "openai" || analysis.source === "groq";
+    const isLiveAiSource = (analysis: AiAnalysis) => analysis.source === "openrouter" || analysis.source === "openai" || analysis.source === "groq";
 
     const topPillarName = useMemo(() => {
         if (!meta) return null;
